@@ -11,6 +11,7 @@ public class NewsItem {
     private int comments=0;
     private String description;
     private String date;
+    private String imageuri;
 
     public String getTitle() {
         return title;
@@ -58,5 +59,13 @@ public class NewsItem {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getImageuri() {
+        return imageuri;
+    }
+
+    public void setImageuri(String imageuri) {
+        this.imageuri = imageuri;
     }
 }

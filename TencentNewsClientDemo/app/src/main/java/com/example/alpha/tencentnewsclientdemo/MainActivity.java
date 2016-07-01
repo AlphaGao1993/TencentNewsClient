@@ -11,13 +11,18 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.alpha.tencentnewsclientdemo.JavaBean.NewsItem;
 import com.example.alpha.tencentnewsclientdemo.Services.NewsInfoParser;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.InputStream;
@@ -98,14 +103,12 @@ public class MainActivity extends AppCompatActivity {
                 return newsItemList.size();
             }
             else return 0;
-
         }
 
         @Override
         public Object getItem(int i) {
             return null;
         }
-
 
         @Override
         public long getItemId(int i) {
@@ -121,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
             TextView comments_view= (TextView) a_view.findViewById(R.id.tv_comments);
             TextView link_view= (TextView) a_view.findViewById(R.id.tv_link);
             TextView date_view= (TextView) a_view.findViewById(R.id.tv_date);
+            ImageView image_view= (ImageView) a_view.findViewById(R.id.tv_image);
             final NewsItem newsItem=newsItemList.get(i);
 
             title_view.setText(newsItem.getTitle());
@@ -129,6 +133,10 @@ public class MainActivity extends AppCompatActivity {
             comments_view.setText(String.valueOf(newsItem.getComments()));
             link_view.setText(newsItem.getLink());
             date_view.setText(newsItem.getDate());
+
+            //loadImageWithUIL(image_view,newsItem.getImageuri());
+            //loadImageWithPicasso(image_view,newsItem.getImageuri());
+            loadImageWithGlide(image_view,newsItem.getImageuri());
 
             a_view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -142,4 +150,26 @@ public class MainActivity extends AppCompatActivity {
             return a_view;
         }
     }
+
+    private void loadImageWithUIL(ImageView imageView,String uri){
+        DisplayImageOptions options=new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.qq)
+                .cacheInMemory(true)
+                .build();
+        ImageLoader.getInstance().displayImage(uri,imageView,options);
+    }
+
+    private  void loadImageWithPicasso(ImageView imageView,String uri){
+        Picasso.with(MainActivity.this)
+                .load(uri)
+                .into(imageView);
+    }
+
+    private void loadImageWithGlide(ImageView imageView,String uri){
+        Glide.with(MainActivity.this)
+                .load(uri)
+                .into(imageView);
+    }
+
+
 }

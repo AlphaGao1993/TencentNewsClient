@@ -74,6 +74,8 @@ public class NewsInfoParser {
                 case XmlPullParser.END_TAG:
                     if ("item".equals(tagName)){
                         if (newsItemList != null) {
+                            newsItem.setImageuri("http://cms.csdnimg.cn/articlev1/"
+                                    +"uploads/allimg/120518/130_120518103752_1.jpg");
                             newsItemList.add(newsItem);
                             newsItem=null;
                         }
