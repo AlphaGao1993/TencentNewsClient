@@ -8,6 +8,7 @@ import com.example.alpha.tencentnewsclientdemo.JavaBean.NewsItem;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +19,28 @@ import java.util.List;
  */
 public class NewsInfoParser {
 
-    public static List<NewsItem> getAllNewsList(InputStream is) throws Exception {
+    public static List<NewsItem> getAllNewsList(InputStream is,String encoding) throws Exception {
 
         List<NewsItem> newsItemList=null;
         NewsItem newsItem=null;
-
         XmlPullParser parser= Xml.newPullParser();
-        parser.setInput(is,"gb2312");
+        /*byte[] buffer=new byte[1024];
+        ByteArrayOutputStream bos=new ByteArrayOutputStream();
+        int len=0;
+        while ((len=is.read(buffer))!=-1){
+            bos.write(buffer,0,len);
+        }
+        String result=bos.toString();
+        if (result.contains("gb2312")){
+            parser.setInput(is,"gb2312");
+            Log.d("news_tag","设置编码成功");
+        }
+        else if (result.contains("utf-8")||result.contains("UTF-8")){
+            parser.setInput(is,"utf-8");
+            Log.d("news_tag","设置编码成功");
+        }*/
+
+        parser.setInput(is,encoding);
         Log.d("news_tag","设置编码成功");
         int type=parser.getEventType();
         while (type!=XmlPullParser.END_DOCUMENT){

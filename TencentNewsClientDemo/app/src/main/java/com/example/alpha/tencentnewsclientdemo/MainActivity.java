@@ -1,10 +1,19 @@
 package com.example.alpha.tencentnewsclientdemo;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +25,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.alpha.tencentnewsclientdemo.Fragment.DM_News_Fragment;
+import com.example.alpha.tencentnewsclientdemo.Fragment.DY_News_Fragment;
+import com.example.alpha.tencentnewsclientdemo.Fragment.GJ_News_Fragment;
+import com.example.alpha.tencentnewsclientdemo.Fragment.GN_News_Fragment;
+import com.example.alpha.tencentnewsclientdemo.Fragment.YX_News_Fragment;
 import com.example.alpha.tencentnewsclientdemo.JavaBean.NewsItem;
 import com.example.alpha.tencentnewsclientdemo.Services.NewsInfoParser;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -25,147 +39,85 @@ import com.squareup.picasso.Picasso;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int SHOW_ITEM = 1;
-    private static final int LOAD_ERROR = 0;
-    private LinearLayout ll_loading;
-    private ListView lv_news;
-    private List<NewsItem> newsItemList;
+    private FragmentPagerAdapter adapter;
+    private GN_News_Fragment gnNewsFragment;
+    private GJ_News_Fragment gjNewsFragment;
+    private DY_News_Fragment dyNewsFragment;
+    private YX_News_Fragment yxNewsFragment;
+    private DM_News_Fragment dmNewsFragment;
+    private List<Fragment> fragmentList;
+    private List<String> titlelist;
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ll_loading= (LinearLayout) findViewById(R.id.load_view);
-        lv_news= (ListView) findViewById(R.id.news_lv);
+        ActionBar actionBar=getSupportActionBar();
+        Drawable drawable=getResources().getDrawable(R.mipmap.qqq);
+        actionBar.setDisplayUseLogoEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setLogo(drawable);
 
-        loadNewsList();
-    }
+        mTabLayout= (TabLayout) findViewById(R.id.tab_title);
+        mTabLayout.setTabTextColors(Color.BLUE,getResources().getColor(R.color.colorAccent));
+        mViewPager= (ViewPager) findViewById(R.id.view_pager);
 
-    private void loadNewsList() {
-        ll_loading.setVisibility(View.VISIBLE);
-        new Thread() {
+        fragmentList=new ArrayList<>();
+        gnNewsFragment=new GN_News_Fragment();
+        gjNewsFragment=new GJ_News_Fragment();
+        dyNewsFragment=new DY_News_Fragment();
+        yxNewsFragment=new YX_News_Fragment();
+        dmNewsFragment=new DM_News_Fragment();
+        fragmentList.add(gnNewsFragment);
+        fragmentList.add(gjNewsFragment);
+        fragmentList.add(dyNewsFragment);
+        fragmentList.add(yxNewsFragment);
+        fragmentList.add(dmNewsFragment);
+
+        titlelist=new ArrayList<>();
+        titlelist.add("国内新闻");
+        titlelist.add("国际新闻");
+        titlelist.add("电影资讯");
+        titlelist.add("游戏竞技");
+        titlelist.add("动漫番剧");
+
+        mTabLayout.addTab(mTabLayout.newTab().setText(titlelist.get(0)));
+        mTabLayout.addTab(mTabLayout.newTab().setText(titlelist.get(1)));
+        mTabLayout.addTab(mTabLayout.newTab().setText(titlelist.get(2)));
+        mTabLayout.addTab(mTabLayout.newTab().setText(titlelist.get(3)));
+        mTabLayout.addTab(mTabLayout.newTab().setText(titlelist.get(4)));
+
+        adapter= new FragmentPagerAdapter(this.getSupportFragmentManager()) {
             @Override
-            public void run() {
-                try{
-                    //为了能看见加载动画
-                    Thread.sleep(1000);
-                    URL url=new URL("http://news.qq.com/newsgn/rss_newsgn.xml");
-                    HttpURLConnection connection= (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setConnectTimeout(5000);//连接超时
-                    connection.setReadTimeout(20000);//下载超时
-                    int code=connection.getResponseCode();
-                    if (code==HttpURLConnection.HTTP_OK){
-                        InputStream is=connection.getInputStream();
-                        newsItemList= NewsInfoParser.getAllNewsList(is);
-                        Message msg=Message.obtain();
-                        msg.what=SHOW_ITEM;
-                        hander.sendMessage(msg);
-                    }
-                }catch (Exception e){
-                    Message msg=Message.obtain();
-                    msg.what=LOAD_ERROR;
-                    hander.sendMessage(msg);
-                }
+            public int getCount() {
+                return fragmentList.size();
             }
-        }.start();
-    }
 
-    private Handler hander=new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            ll_loading.setVisibility(View.INVISIBLE);
-            switch (msg.what){
-                case SHOW_ITEM:
-                    Toast.makeText(MainActivity.this,"获取数据成功",Toast.LENGTH_SHORT).show();
-                    lv_news.setAdapter(new myNewsAdapter());
-                    break;
-                case LOAD_ERROR:
-                    Toast.makeText(MainActivity.this,"获取数据失败",Toast.LENGTH_SHORT).show();
-                    break;
+            @Override
+            public Fragment getItem(int position) {
+                return fragmentList.get(position);
             }
-        }
-    };
 
-    private class myNewsAdapter extends BaseAdapter{
-
-        @Override
-        public int getCount() {
-            if (newsItemList!=null){
-                return newsItemList.size();
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return titlelist.get(position);
             }
-            else return 0;
-        }
 
-        @Override
-        public Object getItem(int i) {
-            return null;
-        }
+            @Override
+            public void destroyItem(ViewGroup container, int position, Object object) {
+                super.destroyItem(container, position, object);
+            }
+        };
 
-        @Override
-        public long getItemId(int i) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            @SuppressLint("ViewHolder") View a_view= View.inflate(MainActivity.this,
-                    R.layout.news_item,null);
-            TextView title_view= (TextView) a_view.findViewById(R.id.tv_title);
-            TextView author_view= (TextView) a_view.findViewById(R.id.tv_author);
-            TextView desc_view= (TextView) a_view.findViewById(R.id.tv_desc);
-            TextView comments_view= (TextView) a_view.findViewById(R.id.tv_comments);
-            TextView link_view= (TextView) a_view.findViewById(R.id.tv_link);
-            TextView date_view= (TextView) a_view.findViewById(R.id.tv_date);
-            ImageView image_view= (ImageView) a_view.findViewById(R.id.tv_image);
-            final NewsItem newsItem=newsItemList.get(i);
-
-            title_view.setText(newsItem.getTitle());
-            author_view.setText(newsItem.getAuthor());
-            desc_view.setText(newsItem.getDescription());
-            comments_view.setText(String.valueOf(newsItem.getComments()));
-            link_view.setText(newsItem.getLink());
-            date_view.setText(newsItem.getDate());
-
-            //loadImageWithUIL(image_view,newsItem.getImageuri());
-            //loadImageWithPicasso(image_view,newsItem.getImageuri());
-            loadImageWithGlide(image_view,newsItem.getImageuri());
-
-            a_view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent=new Intent(MainActivity.this,NewsActivity.class);
-                    intent.putExtra("newslink",newsItem.getLink());
-                    startActivity(intent);
-                }
-            });
-
-            return a_view;
-        }
+        mViewPager.setAdapter(adapter);
+        mTabLayout.setupWithViewPager(mViewPager);
+        mTabLayout.setTabMode(TabLayout.MODE_FIXED);
     }
-
-    private void loadImageWithUIL(ImageView imageView,String uri){
-        DisplayImageOptions options=new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.qq)
-                .cacheInMemory(true)
-                .build();
-        ImageLoader.getInstance().displayImage(uri,imageView,options);
-    }
-
-    private  void loadImageWithPicasso(ImageView imageView,String uri){
-        Picasso.with(MainActivity.this)
-                .load(uri)
-                .into(imageView);
-    }
-
-    private void loadImageWithGlide(ImageView imageView,String uri){
-        Glide.with(MainActivity.this)
-                .load(uri)
-                .into(imageView);
-    }
-
 
 }
