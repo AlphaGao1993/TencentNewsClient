@@ -2,12 +2,10 @@ package com.example.alpha.tencentnewsclientdemo;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -24,14 +22,10 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.channels.NonWritableChannelException;
 import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try{
+                    //为了能看见加载动画
                     Thread.sleep(1000);
                     URL url=new URL("http://news.qq.com/newsgn/rss_newsgn.xml");
                     HttpURLConnection connection= (HttpURLConnection) url.openConnection();
@@ -63,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                     connection.setConnectTimeout(5000);//连接超时
                     connection.setReadTimeout(20000);//下载超时
                     int code=connection.getResponseCode();
-                    if (code==200){
+                    if (code==HttpURLConnection.HTTP_OK){
                         InputStream is=connection.getInputStream();
                         newsItemList= NewsInfoParser.getAllNewsList(is);
                         Message msg=Message.obtain();
@@ -117,7 +112,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-            @SuppressLint("ViewHolder") View a_view= View.inflate(MainActivity.this,R.layout.news_item,null);
+            @SuppressLint("ViewHolder") View a_view= View.inflate(MainActivity.this,
+                    R.layout.news_item,null);
             TextView title_view= (TextView) a_view.findViewById(R.id.tv_title);
             TextView author_view= (TextView) a_view.findViewById(R.id.tv_author);
             TextView desc_view= (TextView) a_view.findViewById(R.id.tv_desc);
